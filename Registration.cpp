@@ -18,6 +18,12 @@ SoapySDR::KwargsList findRX888(const SoapySDR::Kwargs &args)
 
     char manufact[256], product[256], serial[256];
 
+    //The RX888-family FX3 keeps its firmware in volatile RAM and boots into
+    //bootloader mode (04b4:00f3) on every plug-in. Upload the bundled firmware
+    //if needed so the device re-enumerates as the RX888 proper (04b4:00f1).
+    //No-op when firmware is already loaded.
+    rx888_load_firmware();
+
     const size_t this_count = rx888_get_device_count();
 
     for (size_t i = 0; i < this_count; i++)
