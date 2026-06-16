@@ -1,36 +1,38 @@
-name: macOS CI
+name: macOS CI (Apple Silicon)
 on:
   push:
-    branches:
-      - main
+    branches: [ main, macos-arm64-resurrection ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
 jobs:
-  osx-ci:
-    name: OS X
-    permissions: read-all
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        build_type: [Release, Debug]
-        os: [macos-11, macos-12,macos-13]
-    
+  build-arm64:
+    name: macOS arm64 build
+    runs-on: macos-15   # Apple Silicon
+    permissions:
+      contents: read
     steps:
-    - uses: actions/checkout@v3
+      - name: Checkout SoapyRX888
+        uses: actions/checkout@v4
 
-    - name: Install dependencies
-      run: |
-        brew tap cozycactus/tap
-        brew install --HEAD librx888
-        brew install soapysdr
+      - name: Install dependencies
+        run: brew install cmake pkg-config libusb soapysdr
 
-    - name: Build
-      run: |
-        mkdir -p ${{ github.workspace }}/build
-        cd ${{ github.workspace }}/build
-        cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} ${{ github.workspace }}
-        make
+      - name: Build & install librx888 (our fork)
+        run: |
+          git clone --depth 1 https://github.com/qoelet/librx888.git
+          cmake -S librx888 -B librx888/build -DCMAKE_BUILD_TYPE=Release
+          cmake --build librx888/build
+          sudo cmake --install librx888/build
 
-    - name: Install
-      run: |
-        cd ${{ github.workspace }}/build
-        sudo make install
+      - name: Configure SoapyRX888
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build SoapyRX888
+        run: cmake --build build
+
+      - name: Show built module
+        run: |
+          ls -l build
+          find build -name '*.so' -o -name '*.dylib' | xargs -I{} sh -c 'echo "== {} =="; file "{}"'
