@@ -142,20 +142,20 @@ public:
 
     void setGain(const int direction, const size_t channel, const std::string &name, const double value);
 
-    //double getGain(const int direction, const size_t channel) const;
+    double getGain(const int direction, const size_t channel, const std::string &name) const;
 
     SoapySDR::Range getGainRange(const int direction, const size_t channel, const std::string &name) const;
     /*******************************************************************
      * Frequency API
      ******************************************************************/
     
-    //void setFrequency(const int direction,const size_t channel,const std::string &name,const double frequency,const SoapySDR::Kwargs &args = SoapySDR::Kwargs());
-    
-    //double getFrequency(const int direction, const size_t channel, const std::string &name) const;
+    void setFrequency(const int direction, const size_t channel, const std::string &name, const double frequency, const SoapySDR::Kwargs &args = SoapySDR::Kwargs());
 
-    //std::vector<std::string> listFrequencies(const int direction, const size_t channel) const;
+    double getFrequency(const int direction, const size_t channel, const std::string &name) const;
 
-    //SoapySDR::RangeList getFrequencyRange(const int direction, const size_t channel, const std::string &name) const;
+    std::vector<std::string> listFrequencies(const int direction, const size_t channel) const;
+
+    SoapySDR::RangeList getFrequencyRange(const int direction, const size_t channel, const std::string &name) const;
 
     SoapySDR::ArgInfoList getFrequencyArgsInfo(const int direction, const size_t channel) const;
     
@@ -199,6 +199,9 @@ private:
     uint8_t rfGain;
     rx888RXFormat rxFormat;
     uint32_t sampleRate;
+    double centerFrequency;
+    double rfAtten;       // HF DAT-31 attenuation in dB (<= 0)
+    int ifGainIndex;      // HF AD8370 VGA step index (0..126)
     size_t numBuffers, bufferLength, asyncBuffs;
     std::atomic<long long> ticks;
 

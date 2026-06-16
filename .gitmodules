@@ -1,0 +1,3 @@
+[submodule "librx888"]
+	path = librx888
+	url = git@github.com:qoelet/librx888
